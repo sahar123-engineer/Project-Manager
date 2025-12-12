@@ -1,0 +1,289 @@
+<div class="max-w-4xl mx-auto p-6 bg-amber-50">
+  <!-- En-tête -->
+  <div class="bg-amber-100 border-b-2 border-amber-300 text-stone-900 rounded-t-2xl p-8 shadow-md">
+    <h2 class="font-serif text-3xl font-bold mb-2 text-amber-900">Formulaire avec Adresses Multiples</h2>
+  </div>
+
+  <!-- Carte du formulaire -->
+  <div class="bg-white rounded-b-2xl shadow-lg p-8 border border-amber-200">
+    
+    <!-- Boutons d'action en haut -->
+    <div class="flex gap-3 mb-6">
+      <button 
+        type="button"
+        (click)="resetForm()"
+        class="px-4 py-2 bg-stone-500 hover:bg-stone-600 text-white rounded-lg transition duration-300 flex items-center gap-2 font-sans shadow-sm">
+        <span>Réinitialiser</span>
+      </button>
+    </div>
+
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-8">
+      
+      <!-- Section : Informations Personnelles -->
+      <div class="border-l-4 border-amber-600 pl-6">
+        <h3 class="font-serif text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+          <span>Informations Personnelles</span>
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+              Nom <span class="text-red-600">*</span>
+            </label>
+            <input 
+              type="text"
+              formControlName="nom"
+              placeholder="Votre nom"
+              class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+              [ngClass]="{
+                'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !validationService.shouldShowError(nom, submitted),
+                'border-red-500 bg-red-50': validationService.shouldShowError(nom, submitted)
+              }">
+            <p *appShowError="nom" class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+              <span>{{ validationService.getErrorMessage(nom) }}</span>
+            </p>
+          </div>
+
+          <!-- Prénom -->
+          <div>
+            <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+              Prénom <span class="text-red-600">*</span>
+            </label>
+            <input 
+              type="text"
+              formControlName="prenom"
+              placeholder="Votre prénom"
+              class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+              [ngClass]="{
+                'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !validationService.shouldShowError(prenom, submitted),
+                'border-red-500 bg-red-50': validationService.shouldShowError(prenom, submitted)
+              }">
+            <p *appShowError="prenom" class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+              <span>{{ validationService.getErrorMessage(prenom) }}</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Email (pleine largeur) -->
+        <div class="mt-6">
+          <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+            Email <span class="text-red-600">*</span>
+          </label>
+          <input 
+            type="email"
+            formControlName="email"
+            placeholder="votre.email@example.com"
+            class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+            [ngClass]="{
+              'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !validationService.shouldShowError(email, submitted),
+              'border-red-500 bg-red-50': validationService.shouldShowError(email, submitted)
+            }">
+          <p *appShowError="email" class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+            <span>{{ validationService.getErrorMessage(email) }}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Section : Adresses (FormArray de FormGroups) -->
+      <div class="border-l-4 border-amber-700 pl-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-serif text-xl font-semibold text-stone-900 flex items-center gap-2">
+            <span>Adresses (FormArray de FormGroups)</span>
+          </h3>
+          <button 
+            type="button"
+            (click)="addAddress()"
+            class="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition duration-300 flex items-center gap-2 font-sans shadow-sm">
+            <span>Ajouter une adresse</span>
+          </button>
+        </div>
+
+        <!-- Validation du FormArray -->
+        @if (submitted && adresses.invalid) {
+          <div class="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg">
+            <p class="text-sm font-sans text-red-700 flex items-center gap-2">
+              <span>Au moins une adresse est requise</span>
+            </p>
+          </div>
+        }
+
+        <div formArrayName="adresses" class="space-y-6">
+          @for (address of adresses.controls; track address; let i = $index) {
+            <div [formGroupName]="i" class="bg-white rounded-lg p-6 border-2 border-amber-200 shadow-md transition duration-300 hover:shadow-lg relative">
+              
+              <!-- En-tête de l'adresse -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl">{{ getAddressIcon(i) }}</span>
+                  <h4 class="font-serif text-lg font-semibold text-stone-900">
+                    Adresse {{ i + 1 }}
+                  </h4>
+                </div>
+                @if (canRemoveAddress()) {
+                  <button 
+                    type="button"
+                    (click)="removeAddress(i)"
+                    class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition duration-300 flex items-center gap-1 font-sans shadow-sm">
+                    <span>Supprimer</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Type d'adresse -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+                  Type d'adresse <span class="text-red-600">*</span>
+                </label>
+                <select 
+                  formControlName="type"
+                  class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+                  [ngClass]="{
+                    'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !(getAddressGroup(i).get('type')?.invalid && (getAddressGroup(i).get('type')?.touched || submitted)),
+                    'border-red-500 bg-red-50': getAddressGroup(i).get('type')?.invalid && (getAddressGroup(i).get('type')?.touched || submitted)
+                  }">
+                  <option value="">Sélectionnez un type</option>
+                  @for (addressType of addressTypes; track addressType.value) {
+                    <option [value]="addressType.value">{{ addressType.icon }} {{ addressType.label }}</option>
+                  }
+                </select>
+                @if (getAddressGroup(i).get('type')?.invalid && (getAddressGroup(i).get('type')?.touched || submitted)) {
+                  <p class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+                    <span>Le type d'adresse est requis</span>
+                  </p>
+                }
+              </div>
+
+              <!-- Rue -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+                  Rue <span class="text-red-600">*</span>
+                </label>
+                <input 
+                  type="text"
+                  formControlName="rue"
+                  placeholder="Numéro et nom de rue"
+                  class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+                  [ngClass]="{
+                    'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !(getAddressGroup(i).get('rue')?.invalid && (getAddressGroup(i).get('rue')?.touched || submitted)),
+                    'border-red-500 bg-red-50': getAddressGroup(i).get('rue')?.invalid && (getAddressGroup(i).get('rue')?.touched || submitted)
+                  }">
+                @if (getAddressGroup(i).get('rue')?.invalid && (getAddressGroup(i).get('rue')?.touched || submitted)) {
+                  <p class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+                    @if (getAddressGroup(i).get('rue')?.errors?.['required']) {
+                      <span>La rue est requise</span>
+                    }
+                    @if (getAddressGroup(i).get('rue')?.errors?.['minlength']) {
+                      <span>La rue doit contenir au moins 5 caractères</span>
+                    }
+                  </p>
+                }
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Code Postal -->
+                <div>
+                  <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+                    Code Postal <span class="text-red-600">*</span>
+                  </label>
+                  <input 
+                    type="text"
+                    formControlName="codePostal"
+                    placeholder="75008"
+                    maxlength="5"
+                    class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+                    [ngClass]="{
+                      'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !(getAddressGroup(i).get('codePostal')?.invalid && (getAddressGroup(i).get('codePostal')?.touched || submitted)),
+                      'border-red-500 bg-red-50': getAddressGroup(i).get('codePostal')?.invalid && (getAddressGroup(i).get('codePostal')?.touched || submitted)
+                    }">
+                  @if (getAddressGroup(i).get('codePostal')?.invalid && (getAddressGroup(i).get('codePostal')?.touched || submitted)) {
+                    <p class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+                      @if (getAddressGroup(i).get('codePostal')?.errors?.['required']) {
+                        <span>Code postal requis</span>
+                      }
+                      @if (getAddressGroup(i).get('codePostal')?.errors?.['pattern']) {
+                        <span>5 chiffres requis</span>
+                      }
+                    </p>
+                  }
+                </div>
+
+                <!-- Ville -->
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium font-sans text-stone-700 mb-2">
+                    Ville <span class="text-red-600">*</span>
+                  </label>
+                  <input 
+                    type="text"
+                    formControlName="ville"
+                    placeholder="Paris"
+                    class="w-full px-4 py-3 rounded-lg border transition duration-300 font-sans"
+                    [ngClass]="{
+                      'border-amber-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200': !(getAddressGroup(i).get('ville')?.invalid && (getAddressGroup(i).get('ville')?.touched || submitted)),
+                      'border-red-500 bg-red-50': getAddressGroup(i).get('ville')?.invalid && (getAddressGroup(i).get('ville')?.touched || submitted)
+                    }">
+                  @if (getAddressGroup(i).get('ville')?.invalid && (getAddressGroup(i).get('ville')?.touched || submitted)) {
+                    <p class="mt-1 text-sm text-red-600 flex items-center gap-1 font-sans">
+                      @if (getAddressGroup(i).get('ville')?.errors?.['required']) {
+                        <span>La ville est requise</span>
+                      }
+                      @if (getAddressGroup(i).get('ville')?.errors?.['minlength']) {
+                        <span>La ville doit contenir au moins 2 caractères</span>
+                      }
+                    </p>
+                  }
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="text-center py-8 text-stone-500 font-sans">
+              <p>Aucune adresse ajoutée</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- État du formulaire -->
+      <div class="bg-amber-50 rounded-lg p-4 space-y-2 border border-amber-200">
+        <p class="text-sm font-sans text-stone-700">
+          <strong>État du formulaire:</strong>
+          @if (userForm.valid) {
+            <span class="text-green-700">Valide</span>
+          } @else {
+            <span class="text-orange-700">Invalide</span>
+          }
+        </p>
+        <p class="text-sm font-sans text-stone-700">
+          <strong>Nombre d'adresses:</strong>
+          <span class="font-semibold text-amber-900">{{ adresses.length }}</span>
+        </p>
+        <p class="text-sm font-sans text-stone-700">
+          <strong>État des adresses:</strong>
+          @if (adresses.valid) {
+            <span class="text-green-700">Valides</span>
+          } @else {
+            <span class="text-orange-700">Invalides</span>
+          }
+        </p>
+      </div>
+
+      <!-- Bouton de soumission -->
+      <div class="flex justify-end">
+        <button 
+          type="submit"
+          class="px-8 py-3 rounded-lg font-semibold font-sans transition duration-300 transform hover:scale-105 shadow-lg"
+          [ngClass]="{
+            'bg-amber-700 hover:bg-amber-800 text-white': userForm.valid,
+            'bg-stone-300 text-stone-500 cursor-not-allowed': !userForm.valid
+          }">
+          @if (userForm.valid) {
+            <span>Enregistrer l'utilisateur</span>
+          } @else {
+            <span>Veuillez remplir tous les champs</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

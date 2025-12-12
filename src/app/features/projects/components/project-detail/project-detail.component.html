@@ -1,0 +1,39 @@
+<div class="bg-white shadow rounded p-4 space-y-2" *ngIf="project as p">
+  <h3 class="text-lg font-semibold">Détails du projet</h3>
+  <p class="text-sm text-gray-600"><span class="font-medium">Nom:</span> {{ p.name }}</p>
+  <p class="text-sm text-gray-600"><span class="font-medium">Description:</span> {{ p.description }}</p>
+  <p class="text-sm text-gray-600"><span class="font-medium">Statut:</span> {{ p.status }}</p>
+  
+  <!-- Catégorie et Sous-catégorie -->
+  <div *ngIf="p.category" class="flex gap-4">
+    <p class="text-sm text-gray-600">
+      <span class="font-medium">Catégorie:</span> 
+      <span class="inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs font-medium ml-1">
+        {{ p.category }}
+      </span>
+    </p>
+    <p *ngIf="p.subCategory" class="text-sm text-gray-600">
+      <span class="font-medium">Sous-catégorie:</span> 
+      <span class="inline-block px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs font-medium ml-1">
+        {{ p.subCategory }}
+      </span>
+    </p>
+  </div>
+  
+  <div class="mt-1">
+    <app-status-badge [status]="p.status"></app-status-badge>
+  </div>
+  <p class="text-sm text-gray-600"><span class="font-medium">Créé le:</span> {{ p.createdAt | friendlyDate }}</p>
+
+  <div class="mt-2">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-sm font-medium text-gray-700">Progression</span>
+      <span class="text-xs text-gray-500">{{ getProgress() }}%</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+      <div class="bg-green-500 h-2 transition-all" [style.width.%]="getProgress()"></div>
+    </div>
+  </div>
+
+  <!-- Les tâches restent affichées dans la carte projet (ProjectList) -->
+</div>

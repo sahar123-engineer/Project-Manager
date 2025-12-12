@@ -1,1 +1,104 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global dark-mode fallback styles
+	 Many components use Tailwind utility classes but not necessarily dark: variants.
+	 These rules make the app visibly dark when the root gets the `dark` class. */
+html.dark {
+	--app-bg: #0b1220;
+	--app-surface: #0f1724;
+	--app-muted: #9ca3af;
+	--app-text: #e5e7eb;
+}
+
+html.dark body {
+	background-color: var(--app-bg);
+	color: var(--app-text);
+}
+
+/* Make white surfaces darker */
+html.dark .bg-white {
+	background-color: var(--app-surface) !important;
+	color: var(--app-text) !important;
+}
+
+/* Inputs, selects, textareas */
+html.dark input,
+html.dark textarea,
+html.dark select {
+	background-color: transparent;
+	color: var(--app-text);
+	border-color: #374151;
+}
+
+/* Muted text */
+html.dark .text-gray-500,
+html.dark .text-gray-600 {
+	color: var(--app-muted) !important;
+}
+
+/* Borders */
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+	border-color: #032b6a !important;
+}
+
+/* Card shadow subtle in dark */
+html.dark .shadow {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.6) !important;
+}
+
+/* Task status specific shades (dark mode) */
+/* En attente -> yellow-ish, subtle */
+html.dark .border-yellow-400 {
+	border-color: #f59e0b !important; /* keep accent */
+}
+html.dark .bg-yellow-50 {
+	background-color: rgba(245,158,11,0.08) !important; /* subtle yellow tint */
+}
+
+/* En cours -> blue-ish, subtle */
+html.dark .border-blue-400 {
+	border-color: #60a5fa !important;
+}
+html.dark .bg-blue-50 {
+	background-color: rgba(96,165,250,0.06) !important;
+}
+
+/* Terminé -> green-ish, subtle */
+html.dark .border-green-400 {
+	border-color: #34d399 !important;
+}
+html.dark .bg-green-50 {
+	background-color: rgba(52,211,153,0.06) !important;
+}
+
+/* Slightly dim priority labels in dark mode */
+html.dark .text-gray-500 {
+	color: #94a3b8 !important;
+}
+
+/* Animations personnalisées */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Utility classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

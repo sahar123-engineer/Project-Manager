@@ -1,0 +1,204 @@
+<div class="space-y-6">
+  <!-- Dashboard -->
+  <div class="mb-6">
+    <app-dashboard [totalProjects]="totalProjectsCount" [totalTasks]="totalTasksCount" [progress]="globalProgress"></app-dashboard>
+  </div>
+
+  <!-- Section En-tête avec actions -->
+  <div class="bg-white rounded-xl shadow-md p-6 border-2 border-amber-200">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <!-- Titre et compteur -->
+      <div>
+        <h2 class="text-2xl font-serif font-bold text-amber-900 mb-1">Mes Projets</h2>
+        <p class="text-sm font-sans text-stone-600">
+          Vous avez <span class="font-semibold text-amber-700">{{ projects.length }}</span> projet(s) • 
+          Mis à jour le {{ currentDateStr }}
+        </p>
+      </div>
+
+      <!-- Bouton Nouveau projet -->
+      <button 
+        (click)="showAddForm = !showAddForm" 
+        class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-sans font-semibold shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transform hover:scale-105 flex items-center justify-center gap-2">
+        <span>{{ showAddForm ? 'Fermer' : 'Nouveau projet' }}</span>
+      </button>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Recherche -->
+      <div class="relative">
+        <input 
+          [(ngModel)]="searchTerm" 
+          placeholder="Rechercher un projet..."
+          class="w-full px-4 py-3 border-2 border-amber-300 rounded-xl font-sans
+                 focus:border-amber-600 focus:ring-4 focus:ring-amber-200
+                 bg-white text-stone-900
+                 transition-all duration-300 outline-none">
+      </div>
+
+      <!-- Filtre priorité -->
+      <div class="flex items-center gap-3">
+        <label class="text-sm font-sans font-semibold text-stone-700 whitespace-nowrap">Priorité:</label>
+        <select 
+          [(ngModel)]="selectedPriority" 
+          class="flex-1 px-4 py-3 border-2 border-amber-300 rounded-xl font-sans
+                 focus:border-amber-600 focus:ring-4 focus:ring-amber-200
+                 bg-white text-stone-900
+                 transition-all duration-300 outline-none cursor-pointer">
+          <option value="All">Toutes</option>
+          <option value="Haute">Haute</option>
+          <option value="Moyenne">Moyenne</option>
+          <option value="Basse">Basse</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire d'ajout -->
+  <div *ngIf="showAddForm" class="animate-fade-in">
+    <app-add-project (projectAdded)="onProjectAdded($event)"></app-add-project>
+  </div>
+
+  <!-- Liste des projets -->
+  <div class="space-y-4">
+    @for (project of filteredProjects; track project.name) {
+      
+      <!-- Carte projet améliorée -->
+      <div [@listAnim] 
+           class="bg-white rounded-xl shadow-md hover:shadow-xl border-l-4 transition-all duration-300 overflow-hidden group"
+           [class.border-yellow-400]="project.status === 'En attente'"
+           [class.border-amber-600]="project.status === 'En cours'"
+           [class.border-green-500]="project.status === 'Terminé'"
+           (click)="onProjectClick(project)">
+        
+        <div class="p-6">
+          <!-- En-tête de la carte -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <h3 class="text-xl font-serif font-bold text-amber-900 group-hover:text-amber-700 transition-colors">
+                {{ project.name }}
+              </h3>
+              <p class="text-sm font-sans text-stone-600 mt-1 line-clamp-2">
+                {{ project.description }}
+              </p>
+            </div>
+            
+            <!-- Badge statut -->
+            <span class="px-3 py-1 rounded-full text-xs font-sans font-semibold whitespace-nowrap ml-4"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-700': project.status === 'En attente',
+                    'bg-amber-100 text-amber-800': project.status === 'En cours',
+                    'bg-green-100 text-green-700': project.status === 'Terminé'
+                  }">
+              {{ project.status }}
+            </span>
+          </div>
+
+          <!-- Catégories -->
+          <div *ngIf="project.category" class="flex gap-2 flex-wrap mb-4">
+            <span class="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-sans font-medium">
+              {{ project.category }}
+            </span>
+            <span *ngIf="project.subCategory" class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-sans font-medium">
+              {{ project.subCategory }}
+            </span>
+          </div>
+
+          <!-- Statistiques tâches -->
+          <div class="flex items-center gap-4 mb-4 text-sm font-sans text-stone-600">
+            <span class="flex items-center gap-1">
+              <span class="font-medium">{{ project.tasks?.length || 0 }}</span> tâches
+            </span>
+          </div>
+
+          <!-- Section tâches -->
+          <div class="space-y-3">
+            <!-- Ajouter une tâche -->
+            <div class="flex gap-2">
+              <input #newTaskInput 
+                     type="text" 
+                     placeholder="Ajouter une nouvelle tâche..."
+                     class="flex-1 px-3 py-2 border-2 border-amber-300 rounded-lg font-sans
+                            focus:border-amber-600 focus:ring-2 focus:ring-amber-200
+                            bg-white text-stone-900
+                            transition-all duration-300 outline-none text-sm" />
+              <button (click)="addTask(project, newTaskInput.value); newTaskInput.value='';"
+                      class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 font-sans font-medium text-sm whitespace-nowrap">
+                Ajouter
+              </button>
+            </div>
+
+            <!-- Liste des tâches -->
+            <div class="mt-3">
+              <app-task-list 
+                [tasks]="getTasksByPriority(project)" 
+                (removeTask)="removeTask(project, $event)" 
+                (statusChange)="changeTaskStatus(project, $event)">
+              </app-task-list>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-amber-200">
+            <button (click)="viewDetails(project, $event)"
+                    class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 font-sans font-medium text-sm flex items-center justify-center gap-2">
+              Voir détails
+            </button>
+            @if (isAdmin) {
+              <button (click)="editProject(project, $event)" 
+                      class="flex-1 px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition duration-300 font-sans font-medium text-sm flex items-center justify-center gap-2">
+                Modifier
+              </button>
+              <button (click)="removeProject(project); $event.stopPropagation()" 
+                      class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 font-sans font-medium text-sm flex items-center gap-2">
+                Supprimer
+              </button>
+            }
+          </div>
+
+          <!-- Détails expandables -->
+          @if (selectedProject === project) {
+            <div class="mt-4 pt-4 border-t border-amber-200 animate-fade-in">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-lg font-serif font-semibold text-amber-900">Détails du projet</h4>
+                <button class="px-3 py-1 bg-amber-100 text-stone-700 rounded-lg hover:bg-amber-200 transition duration-300 text-sm font-sans"
+                        (click)="selectedProject = null; $event.stopPropagation()">
+                  Fermer
+                </button>
+              </div>
+              <app-project-detail [project]="selectedProject"></app-project-detail>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Formulaire d'édition en dessous du projet -->
+      @if (showEditForm && projectToEdit === project) {
+        <div class="mt-4 animate-fade-in">
+          <div class="bg-amber-50 border-2 border-amber-300 rounded-t-xl px-4 py-2">
+            <p class="text-sm font-sans font-semibold text-amber-900">
+              ✏️ Modification du projet: {{ project.name }}
+            </p>
+          </div>
+          <app-edit-project 
+            [project]="projectToEdit"
+            (projectUpdated)="onProjectUpdated($event)"
+            (cancelled)="onEditCancelled()">
+          </app-edit-project>
+        </div>
+      }
+
+    } @empty {
+      <!-- Message vide -->
+      <div class="text-center py-16 bg-white rounded-xl shadow-md border-2 border-amber-200">
+        @if (searchTerm) {
+          <p class="text-lg font-sans text-stone-600">Aucun projet ne correspond à "{{ searchTerm }}"</p>
+        } @else {
+          <p class="text-lg font-sans text-stone-600 mb-2">Aucun projet pour le moment</p>
+          <p class="text-sm font-sans text-stone-500">Cliquez sur "Nouveau projet" pour commencer !</p>
+        }
+      </div>
+    }
+  </div>
+</div>

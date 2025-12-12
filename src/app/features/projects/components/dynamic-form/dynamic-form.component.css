@@ -1,0 +1,53 @@
+/* Styles pour le composant DynamicForm */
+
+.form-array-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.remove-button {
+  transition: all 0.2s ease;
+}
+
+.remove-button:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.add-button {
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.star-rating {
+  cursor: pointer;
+  user-select: none;
+}
+
+.competence-item {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

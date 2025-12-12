@@ -1,0 +1,191 @@
+<div class="max-w-3xl mx-auto p-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
+  <header class="mb-8">
+    <h2 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+      Modifier le Projet
+    </h2>
+    <p class="text-gray-600 dark:text-gray-400 mt-2">Modifiez les informations du projet</p>
+  </header>
+
+  <form #projectForm="ngForm" (ngSubmit)="onSubmit(projectForm)" class="space-y-6">
+    
+    <!-- Grid 2 colonnes pour Nom et Statut -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Nom du projet -->
+      <div>
+        <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Nom du projet <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="editedProject.name"
+          #nameInput="ngModel"
+          required
+          minlength="4"
+          placeholder="Ex: Application e-commerce"
+          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl
+                 focus:border-green-500 focus:ring-4 focus:ring-green-500/20
+                 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                 transition-all duration-200 outline-none
+                 placeholder:text-gray-400"
+          [class.border-red-500]="nameInput.invalid && nameInput.touched"
+        />
+        <div *ngIf="nameInput.invalid && nameInput.touched" class="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p *ngIf="nameInput.errors?.['required']">⚠️ Le nom du projet est obligatoire</p>
+          <p *ngIf="nameInput.errors?.['minlength']">⚠️ Minimum 4 caractères</p>
+        </div>
+      </div>
+
+      <!-- Statut -->
+      <div>
+        <label for="status" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Statut <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="status"
+          name="status"
+          [(ngModel)]="editedProject.status"
+          #statusInput="ngModel"
+          required
+          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl
+                 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20
+                 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                 transition-all duration-200 outline-none cursor-pointer"
+          [class.border-red-500]="statusInput.invalid && statusInput.touched"
+        >
+          <option value="">Sélectionner...</option>
+          <option value="En attente">En attente</option>
+          <option value="En cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+        </select>
+        <div *ngIf="statusInput.invalid && statusInput.touched" class="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p *ngIf="statusInput.errors?.['required']">⚠️ Sélectionnez un statut</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid 2 colonnes pour Catégorie et Sous-catégorie -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Catégorie -->
+      <div>
+        <label for="category" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Catégorie <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="category"
+          name="category"
+          [(ngModel)]="editedProject.category"
+          (ngModelChange)="onCategoryChange()"
+          #categoryInput="ngModel"
+          required
+          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl
+                 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20
+                 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                 transition-all duration-200 outline-none cursor-pointer"
+          [class.border-red-500]="categoryInput.invalid && categoryInput.touched"
+        >
+          <option value="">Sélectionner...</option>
+          <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+        </select>
+        <div *ngIf="categoryInput.invalid && categoryInput.touched" class="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p *ngIf="categoryInput.errors?.['required']">⚠️ Sélectionnez une catégorie</p>
+        </div>
+      </div>
+
+      <!-- Sous-catégorie -->
+      <div>
+        <label for="subCategory" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Sous-catégorie <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="subCategory"
+          name="subCategory"
+          [(ngModel)]="editedProject.subCategory"
+          #subCategoryInput="ngModel"
+          required
+          [disabled]="!editedProject.category"
+          class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl
+                 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20
+                 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                 transition-all duration-200 outline-none cursor-pointer
+                 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+          [class.border-red-500]="subCategoryInput.invalid && subCategoryInput.touched"
+        >
+          <option value="">{{ editedProject.category ? 'Sélectionner...' : 'Choisissez d\'abord une catégorie' }}</option>
+          <option *ngFor="let sub of filteredSubCategories" [value]="sub">{{ sub }}</option>
+        </select>
+        <div *ngIf="subCategoryInput.invalid && subCategoryInput.touched" class="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p *ngIf="subCategoryInput.errors?.['required']">⚠️ Sélectionnez une sous-catégorie</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description pleine largeur -->
+    <div>
+      <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+        Description <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="editedProject.description"
+        #descInput="ngModel"
+        required
+        rows="4"
+        placeholder="Décrivez votre projet en détail..."
+        class="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl
+               focus:border-green-500 focus:ring-4 focus:ring-green-500/20
+               bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+               transition-all duration-200 outline-none resize-none
+               placeholder:text-gray-400"
+        [class.border-red-500]="descInput.invalid && descInput.touched"
+      ></textarea>
+      <div *ngIf="descInput.invalid && descInput.touched" class="mt-2 text-sm text-red-600 dark:text-red-400">
+        <p *ngIf="descInput.errors?.['required']">⚠️ La description est obligatoire</p>
+      </div>
+    </div>
+
+    <!-- Boutons -->
+    <div class="flex gap-4 pt-6">
+      <button
+        type="submit"
+        [disabled]="projectForm.invalid"
+        class="flex-1 px-8 py-3.5 bg-gradient-to-r from-green-600 to-teal-600 
+               text-white font-semibold rounded-xl
+               shadow-lg shadow-green-500/50 hover:shadow-xl hover:shadow-green-500/60
+               hover:from-green-700 hover:to-teal-700
+               disabled:from-gray-300 disabled:to-gray-400 
+               disabled:shadow-none disabled:cursor-not-allowed
+               transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
+               disabled:transform-none disabled:opacity-60"
+      >
+        Enregistrer les modifications
+      </button>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="px-8 py-3.5 bg-white dark:bg-gray-800 
+               text-gray-700 dark:text-gray-200 font-semibold rounded-xl
+               border-2 border-gray-300 dark:border-gray-600
+               hover:bg-gray-50 dark:hover:bg-gray-700 
+               hover:border-gray-400 dark:hover:border-gray-500
+               transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+      >
+        Annuler
+      </button>
+    </div>
+
+    <!-- Info Two-Way Binding (pour démo) -->
+    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+      <p class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Two-Way Data Binding en action :</p>
+      <p class="text-sm text-blue-700 dark:text-blue-300">
+        Nom actuel : <strong>{{ editedProject.name || '(vide)' }}</strong>
+      </p>
+      <p class="text-sm text-blue-700 dark:text-blue-300">
+        Statut actuel : <strong>{{ editedProject.status || '(vide)' }}</strong>
+      </p>
+    </div>
+
+  </form>
+</div>
